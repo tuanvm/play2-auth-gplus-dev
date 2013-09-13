@@ -14,10 +14,12 @@ class GPlusPlugin(application: Application) extends Plugin {
     val GPLUS_ID: String = "gplus.id";
     val GPLUS_SECRET: String = "gplus.secret";
     val GPLUS_CALLBACK_URL: String = "gplus.callbackURL"
+    val GPLUS_SCOPE: String = "gplus.scope"
 
     lazy val id: String = application.configuration.getString(GPLUS_ID).getOrElse(null);
     lazy val secret: String = application.configuration.getString(GPLUS_SECRET).getOrElse(null);
     lazy val callbackURL: String = application.configuration.getString(GPLUS_CALLBACK_URL).getOrElse(null);
+    lazy val scope: String = application.configuration.getString(GPLUS_SCOPE).getOrElse(null);
 
     /* (non-Javadoc)
      * @see play.api.Plugin#onStart()
@@ -35,13 +37,8 @@ class GPlusPlugin(application: Application) extends Plugin {
      * @param scope the scope
      * @return the login url
      */
-    def getLoginUrl(scope: String): String = {
-        if ((scope != null) && (!scope.isEmpty())) {
-            return "https://accounts.google.com/o/oauth2/auth?client_id=" + id + "&redirect_uri=" + callbackURL + "&response_type=code&scope=" + scope
-        } else {
-            val defaulScope = """https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&state=%2Fprofile&"""
-            return "https://accounts.google.com/o/oauth2/auth?client_id=" + id + "&redirect_uri=" + callbackURL + "&response_type=code&scope=" + defaulScope
-        }
+    def getLoginUrl: String = {
+        return "https://accounts.google.com/o/oauth2/auth?client_id=" + id + "&redirect_uri=" + callbackURL + "&response_type=code&scope=" + scope
     }
 
     def strip(quoted: String): String = {
@@ -60,10 +57,10 @@ class GPlusPlugin(application: Application) extends Plugin {
         return accessToken
     }
 
-    def getGPlusUser(accessToken:String):JsValue = {
+    def getGPlusUser(accessToken: String): JsValue = {
         val duration = Duration(10, SECONDS)
         val future: Future[play.api.libs.ws.Response] = WS.url("https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + accessToken).get
         val response = Await.result(future, duration)
-        return response.json      
+        return response.json
     }
 }
