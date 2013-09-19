@@ -10,14 +10,31 @@ import play.api.libs.json.JsValue
 trait GPlusConnect {
     self: GPlusConfig =>
 
+    /**
+     * Gets the g plus authorize url.
+     *
+     * @return the g plus authorize url
+     */
     def getGPlusAuthorizeUrl: String = {
         return "https://accounts.google.com/o/oauth2/auth?client_id=" + gpId + "&redirect_uri=" + gpCallbackURL + "&response_type=code&scope=" + gpScope
     }
 
+    /**
+     * Strip.
+     *
+     * @param quoted the quoted
+     * @return the java.lang. string
+     */
     def strip(quoted: String): String = {
         quoted.filter(char => char != '\"')
     }
 
+    /**
+     * Gets the g plus access token.
+     *
+     * @param code the code
+     * @return the g plus access token
+     */
     def getGPlusAccessToken(code: String): String = {
         val postBody = "code=" + code + "&client_id=" + gpId + "&client_secret=" + gpSecret + "&redirect_uri=" + gpCallbackURL + "&grant_type=authorization_code"
         val duration = Duration(10, SECONDS)
@@ -29,6 +46,12 @@ trait GPlusConnect {
         return accessToken
     }
 
+    /**
+     * Gets the g plus user.
+     *
+     * @param accessToken the access token
+     * @return the g plus user
+     */
     def getGPlusUser(accessToken: String): JsValue = {
         val duration = Duration(10, SECONDS)
         val future: Future[play.api.libs.ws.Response] = WS.url("https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + accessToken).get
